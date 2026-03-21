@@ -4,13 +4,29 @@ import {
   Layers, BookOpen, Ruler, CheckCircle2, Save 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SettingsProps } from '../types';
+import { School } from '../../domain/school/types';
+import { AcademicYear, Term, Class, Stream, Subject } from '../../domain/academics/types';
+import { AssessmentComponent, GradeScale } from '../../domain/assessments/types';
 
-export default function Settings({ 
+interface SchoolSettingsPageProps {
+  school: School;
+  academicYears: AcademicYear[];
+  terms: Term[];
+  classes: Class[];
+  streams: Stream[];
+  subjects: Subject[];
+  assessmentComponents: AssessmentComponent[];
+  gradeScale: GradeScale[];
+  onUpdateSchool: (school: School) => void;
+  onUpdateAssessmentComponents: (components: AssessmentComponent[]) => void;
+  onUpdateGradeScale: (scale: GradeScale[]) => void;
+}
+
+export default function SchoolSettingsPage({ 
   school, academicYears, terms, classes, streams, 
   subjects, assessmentComponents, gradeScale,
   onUpdateSchool, onUpdateAssessmentComponents, onUpdateGradeScale
-}: SettingsProps) {
+}: SchoolSettingsPageProps) {
   const [activeTab, setActiveTab] = useState<'School' | 'Academic' | 'Grading' | 'Assessments'>('School');
   const [localSchool, setLocalSchool] = useState(school);
   const [localComponents, setLocalComponents] = useState(assessmentComponents);

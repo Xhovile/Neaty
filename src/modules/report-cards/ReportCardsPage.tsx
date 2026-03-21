@@ -1,14 +1,32 @@
 import React, { useState, useMemo } from 'react';
-import { Printer, User, Search, GraduationCap, FileText, Stamp, PenTool, Calendar } from 'lucide-react';
+import { Printer, User, GraduationCap, FileText, Stamp, PenTool, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
-import { ReportCardProps } from '../types';
-import { getGradeFromScale } from '../constants';
+import { School } from '../../domain/school/types';
+import { Student, Enrollment } from '../../domain/students/types';
+import { MarkEntry } from '../../domain/reports/types';
+import { Subject, Term, AcademicYear, Class, Stream } from '../../domain/academics/types';
+import { AssessmentComponent, GradeScale } from '../../domain/assessments/types';
+import { getGradeFromScale } from '../../shared/utils/results';
 
-export default function ReportCard({ 
+interface ReportCardsPageProps {
+  students: Student[];
+  marks: MarkEntry[];
+  school: School;
+  subjects: Subject[];
+  assessmentComponents: AssessmentComponent[];
+  gradeScale: GradeScale[];
+  enrollments: Enrollment[];
+  classes: Class[];
+  streams: Stream[];
+  terms: Term[];
+  academicYears: AcademicYear[];
+}
+
+export default function ReportCardsPage({ 
   school, students, marks, subjects, enrollments, 
   assessmentComponents, gradeScale, classes, streams,
   terms, academicYears 
-}: ReportCardProps) {
+}: ReportCardsPageProps) {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedTermId, setSelectedTermId] = useState(terms.find(t => t.isCurrent)?.id || terms[0]?.id || '');
   const [selectedYearId, setSelectedYearId] = useState(academicYears.find(y => y.isCurrent)?.id || academicYears[0]?.id || '');
@@ -122,7 +140,7 @@ export default function ReportCard({
               <div className="text-right flex flex-col gap-2">
                 <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm print:bg-gray-50 print:border print:border-gray-200">
                   <p className="text-[10px] font-bold text-blue-200 uppercase tracking-widest print:text-gray-400">Academic Year</p>
-                  <p className="text-lg font-bold">{currentAcademicYear.name}</p>
+                  <p className="text-lg font-bold">{currentAcademicYear?.name}</p>
                 </div>
               </div>
             </div>
@@ -143,7 +161,7 @@ export default function ReportCard({
               </div>
               <div>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Term</p>
-                <p className="text-lg font-bold text-gray-800">{currentTerm.name}</p>
+                <p className="text-lg font-bold text-gray-800">{currentTerm?.name}</p>
               </div>
             </div>
 

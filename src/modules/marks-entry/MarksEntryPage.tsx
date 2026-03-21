@@ -1,13 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import { Save, Calculator, User, Book, FilePlus, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MarksEntryProps } from '../types';
-import { calculateWeightedTotal, getGradeFromScale } from '../constants';
+import { Student, Enrollment } from '../../domain/students/types';
+import { Subject, Term, AcademicYear } from '../../domain/academics/types';
+import { AssessmentComponent, GradeScale } from '../../domain/assessments/types';
+import { MarkEntry } from '../../domain/reports/types';
+import { calculateWeightedTotal, getGradeFromScale } from '../../shared/utils/results';
 
-export default function MarksEntry({ 
+interface MarksEntryPageProps {
+  students: Student[];
+  enrollments: Enrollment[];
+  subjects: Subject[];
+  assessmentComponents: AssessmentComponent[];
+  gradeScale: GradeScale[];
+  currentTerm: Term;
+  currentAcademicYear: AcademicYear;
+  onSaveMarks: (mark: Omit<MarkEntry, 'id'>) => void;
+  marks: MarkEntry[];
+}
+
+export default function MarksEntryPage({ 
   students, subjects, enrollments, assessmentComponents, 
   gradeScale, currentTerm, currentAcademicYear, onSaveMarks, marks 
-}: MarksEntryProps) {
+}: MarksEntryPageProps) {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState(subjects[0]?.id || '');
   const [scores, setScores] = useState<{ [componentId: string]: number }>({});

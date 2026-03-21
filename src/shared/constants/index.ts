@@ -1,7 +1,7 @@
-import { 
-  School, AcademicYear, Term, Class, Stream, Subject, Student, 
-  Enrollment, AssessmentComponent, GradeScale, MarkEntry 
-} from './types';
+import { School, User } from '../../domain/school/types';
+import { AcademicYear, Term, Class, Stream, Subject } from '../../domain/academics/types';
+import { Student, Enrollment } from '../../domain/students/types';
+import { AssessmentComponent, GradeScale } from '../../domain/assessments/types';
 
 export const DEMO_SCHOOL: School = {
   id: 's1',
@@ -65,18 +65,3 @@ export const DEMO_GRADE_SCALE: GradeScale[] = [
   { id: 'gs4', minScore: 50, maxScore: 59, grade: 'D', remark: 'Pass' },
   { id: 'gs5', minScore: 0, maxScore: 49, grade: 'F', remark: 'Fail' },
 ];
-
-export const calculateWeightedTotal = (scores: { [componentId: string]: number }, components: AssessmentComponent[]): number => {
-  let total = 0;
-  components.forEach(comp => {
-    const score = scores[comp.id] || 0;
-    // Calculate weighted contribution: (score / maxScore) * weight
-    total += (score / comp.maxScore) * comp.weight;
-  });
-  return Math.round(total * 100) / 100;
-};
-
-export const getGradeFromScale = (total: number, scale: GradeScale[]): { grade: string; remark: string } => {
-  const found = scale.find(s => total >= s.minScore && total <= s.maxScore);
-  return found ? { grade: found.grade, remark: found.remark } : { grade: 'N/A', remark: 'No Grade' };
-};

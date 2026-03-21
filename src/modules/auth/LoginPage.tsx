@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { User as UserType } from '../types';
+import { User as UserType } from '../../domain/school/types';
 import { LogIn, GraduationCap, ShieldCheck, UserCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
-interface LoginProps {
+interface LoginPageProps {
   onLogin: (user: UserType) => void;
 }
 
-export default function Login({ onLogin }: LoginProps) {
+export default function LoginPage({ onLogin }: LoginPageProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'Admin' | 'Teacher'>('Admin');

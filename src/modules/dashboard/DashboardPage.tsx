@@ -1,16 +1,18 @@
 import React from 'react';
 import { Users, BookOpen, FileText, GraduationCap, Calendar, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Student, MarkEntry, Subject, Class } from '../types';
+import { Student } from '../../domain/students/types';
+import { MarkEntry } from '../../domain/reports/types';
+import { Subject, Class } from '../../domain/academics/types';
 
-interface DashboardProps {
+interface DashboardPageProps {
   students: Student[];
   marks: MarkEntry[];
   subjects: Subject[];
   classes: Class[];
 }
 
-export default function Dashboard({ students, marks, subjects, classes }: DashboardProps) {
+export default function DashboardPage({ students, marks, subjects, classes }: DashboardPageProps) {
   const stats = [
     { label: 'Total Students', value: students.length, icon: Users, color: 'bg-blue-500', shadow: 'shadow-blue-100' },
     { label: 'Classes', value: classes.length, icon: GraduationCap, color: 'bg-emerald-500', shadow: 'shadow-emerald-100' },
