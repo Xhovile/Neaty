@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Users, BookOpen, FileText, GraduationCap, TrendingUp, Calendar, Search } from 'lucide-react';
+import React from 'react';
+import { Users, BookOpen, FileText, GraduationCap, Calendar, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { getSchoolNews } from '../services/aiService';
 import { Student, MarkEntry, Subject, Class } from '../types';
 
 interface DashboardProps {
@@ -12,16 +11,6 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ students, marks, subjects, classes }: DashboardProps) {
-  const [news, setNews] = useState<string>('Loading education trends...');
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      const result = await getSchoolNews();
-      setNews(result);
-    };
-    fetchNews();
-  }, []);
-
   const stats = [
     { label: 'Total Students', value: students.length, icon: Users, color: 'bg-blue-500', shadow: 'shadow-blue-100' },
     { label: 'Classes', value: classes.length, icon: GraduationCap, color: 'bg-emerald-500', shadow: 'shadow-emerald-100' },
@@ -69,41 +58,20 @@ export default function Dashboard({ students, marks, subjects, classes }: Dashbo
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* AI News Section */}
-        <motion.div
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-xl p-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-50 p-2 rounded-xl text-blue-600">
-                <Search size={20} />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">Education Trends & News</h2>
-            </div>
-            <div className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">AI Powered</div>
-          </div>
-          <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed">
-            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 italic whitespace-pre-wrap">
-              {news}
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-400">
-            <TrendingUp size={14} />
-            <span>Data sourced via Google Search Grounding</span>
-          </div>
-        </motion.div>
-
+      <div className="grid grid-cols-1 gap-8">
         {/* Quick Actions / Recent Activity */}
         <motion.div
-          initial={{ x: 20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
           className="bg-white rounded-3xl border border-gray-100 shadow-xl p-8"
         >
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Quick Insights</h2>
-          <div className="space-y-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-blue-50 p-2 rounded-xl text-blue-600">
+              <Zap size={20} />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">System Insights</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex items-start gap-4">
               <div className="w-2 h-2 rounded-full bg-blue-500 mt-2" />
               <div>
@@ -126,9 +94,6 @@ export default function Dashboard({ students, marks, subjects, classes }: Dashbo
               </div>
             </div>
           </div>
-          <button className="w-full mt-8 py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold rounded-xl text-sm transition-colors border border-gray-200">
-            View All Activity
-          </button>
         </motion.div>
       </div>
     </div>
