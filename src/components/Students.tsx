@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, UserPlus, X, Filter } from 'lucide-react';
+import { Search, Edit2, Trash2, UserPlus, X, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Student } from '../types';
-import { CLASSES, TERMS } from '../constants';
 
 interface StudentsProps {
   students: Student[];
@@ -17,8 +16,6 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
     fullName: '',
     admissionNumber: '',
     gender: 'Male',
-    class: CLASSES[0],
-    term: TERMS[0],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,8 +26,6 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
       fullName: '',
       admissionNumber: '',
       gender: 'Male',
-      class: CLASSES[0],
-      term: TERMS[0],
     });
   };
 
@@ -44,15 +39,15 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Student Management</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage your school's student records and admissions.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Student Directory</h1>
+          <p className="text-gray-500 text-sm mt-1">Manage core student records. Enrollments are handled separately.</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl shadow-lg shadow-blue-100 transition-all flex items-center justify-center gap-2 font-semibold group"
         >
           <UserPlus size={20} className="group-hover:scale-110 transition-transform" />
-          <span>Add New Student</span>
+          <span>Register Student</span>
         </button>
       </div>
 
@@ -65,12 +60,12 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
             placeholder="Search by name or admission number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
           />
         </div>
         <button className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold rounded-2xl text-sm transition-colors border border-gray-200">
           <Filter size={18} />
-          <span>Filters</span>
+          <span>Advanced Filter</span>
         </button>
       </div>
 
@@ -83,8 +78,6 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
                 <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Admission No.</th>
                 <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</th>
                 <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Gender</th>
-                <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Class</th>
-                <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Term</th>
                 <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -111,8 +104,6 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
                         {student.gender}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-sm text-gray-600 font-medium">{student.class}</td>
-                    <td className="px-8 py-5 text-sm text-gray-600 font-medium">{student.term}</td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
@@ -130,8 +121,8 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-8 py-12 text-center text-gray-400 italic">
-                    No students found matching your search.
+                  <td colSpan={4} className="px-8 py-12 text-center text-gray-400 italic">
+                    No students registered yet.
                   </td>
                 </tr>
               )}
@@ -153,7 +144,7 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
               <div className="bg-blue-600 p-6 text-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <UserPlus size={24} />
-                  <h2 className="text-xl font-bold">Add New Student</h2>
+                  <h2 className="text-xl font-bold">Register Student</h2>
                 </div>
                 <button onClick={() => setIsAdding(false)} className="hover:bg-blue-500 p-1 rounded-xl transition-colors">
                   <X size={24} />
@@ -161,60 +152,42 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
               </div>
 
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
+                <div className="space-y-6">
+                  <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
                     <input
                       type="text"
                       required
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                       placeholder="e.g. John Doe"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Admission No.</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.admissionNumber}
-                      onChange={(e) => setFormData({ ...formData, admissionNumber: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
-                      placeholder="ADM-000"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Gender</label>
-                    <select
-                      value={formData.gender}
-                      onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm appearance-none cursor-pointer"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Class</label>
-                    <select
-                      value={formData.class}
-                      onChange={(e) => setFormData({ ...formData, class: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm appearance-none cursor-pointer"
-                    >
-                      {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Term</label>
-                    <select
-                      value={formData.term}
-                      onChange={(e) => setFormData({ ...formData, term: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm appearance-none cursor-pointer"
-                    >
-                      {TERMS.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Admission No.</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.admissionNumber}
+                        onChange={(e) => setFormData({ ...formData, admissionNumber: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                        placeholder="N-000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Gender</label>
+                      <select
+                        value={formData.gender}
+                        onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm appearance-none cursor-pointer"
+                      >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -230,7 +203,7 @@ export default function Students({ students, onAddStudent, onDeleteStudent }: St
                     type="submit"
                     className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-blue-100"
                   >
-                    Save Student
+                    Register
                   </button>
                 </div>
               </form>

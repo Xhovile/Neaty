@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Users, BookOpen, FileText, GraduationCap, TrendingUp, Calendar, Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import { getSchoolNews } from '../services/aiService';
-import { Student, Mark } from '../types';
-import { SUBJECTS } from '../constants';
+import { Student, MarkEntry, Subject, Class } from '../types';
 
 interface DashboardProps {
   students: Student[];
-  marks: Mark[];
+  marks: MarkEntry[];
+  subjects: Subject[];
+  classes: Class[];
 }
 
-export default function Dashboard({ students, marks }: DashboardProps) {
+export default function Dashboard({ students, marks, subjects, classes }: DashboardProps) {
   const [news, setNews] = useState<string>('Loading education trends...');
 
   useEffect(() => {
@@ -23,9 +24,9 @@ export default function Dashboard({ students, marks }: DashboardProps) {
 
   const stats = [
     { label: 'Total Students', value: students.length, icon: Users, color: 'bg-blue-500', shadow: 'shadow-blue-100' },
-    { label: 'Total Classes', value: 12, icon: GraduationCap, color: 'bg-emerald-500', shadow: 'shadow-emerald-100' },
-    { label: 'Total Subjects', value: SUBJECTS.length, icon: BookOpen, color: 'bg-amber-500', shadow: 'shadow-amber-100' },
-    { label: 'Reports Generated', value: marks.length, icon: FileText, color: 'bg-indigo-500', shadow: 'shadow-indigo-100' },
+    { label: 'Classes', value: classes.length, icon: GraduationCap, color: 'bg-emerald-500', shadow: 'shadow-emerald-100' },
+    { label: 'Subjects', value: subjects.length, icon: BookOpen, color: 'bg-amber-500', shadow: 'shadow-amber-100' },
+    { label: 'Reports Ready', value: marks.length, icon: FileText, color: 'bg-indigo-500', shadow: 'shadow-indigo-100' },
   ];
 
   return (
@@ -33,8 +34,8 @@ export default function Dashboard({ students, marks }: DashboardProps) {
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 text-sm mt-1">Welcome back! Here's what's happening in your school today.</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
+          <p className="text-gray-500 text-sm mt-1">Welcome back! Here's what's happening in Neaty today.</p>
         </div>
         <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
           <div className="bg-blue-50 p-2 rounded-xl text-blue-600">
@@ -106,15 +107,15 @@ export default function Dashboard({ students, marks }: DashboardProps) {
             <div className="flex items-start gap-4">
               <div className="w-2 h-2 rounded-full bg-blue-500 mt-2" />
               <div>
-                <p className="text-sm font-bold text-gray-800">Grading System Active</p>
-                <p className="text-xs text-gray-500 mt-1">Standard 80-100 (A) logic applied to all reports.</p>
+                <p className="text-sm font-bold text-gray-800">Dynamic Grading Active</p>
+                <p className="text-xs text-gray-500 mt-1">Configurable scales are applied to all reports.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2" />
               <div>
-                <p className="text-sm font-bold text-gray-800">Term 1 Reports</p>
-                <p className="text-xs text-gray-500 mt-1">Most students have completed their Term 1 assessments.</p>
+                <p className="text-sm font-bold text-gray-800">Term Management</p>
+                <p className="text-xs text-gray-500 mt-1">Multiple terms and academic years supported.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">

@@ -16,7 +16,12 @@ export default function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     // Mock login
     if (username.trim()) {
-      onLogin({ username, role });
+      onLogin({
+        id: Math.random().toString(36).substr(2, 9),
+        username,
+        role,
+        schoolId: 's1',
+      });
     }
   };
 
@@ -31,7 +36,7 @@ export default function Login({ onLogin }: LoginProps) {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-4 backdrop-blur-sm">
             <GraduationCap size={32} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">EduReport Pro</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Neaty</h1>
           <p className="text-blue-100 mt-1 text-sm">School Report Management System</p>
         </div>
 

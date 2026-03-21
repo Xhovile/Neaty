@@ -1,69 +1,82 @@
-import { Grade, Student, Subject, Mark } from './types';
+import { 
+  School, AcademicYear, Term, Class, Stream, Subject, Student, 
+  Enrollment, AssessmentComponent, GradeScale, MarkEntry 
+} from './types';
 
-export const CLASSES = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
-export const TERMS = ['Term 1', 'Term 2', 'Term 3'];
+export const DEMO_SCHOOL: School = {
+  id: 's1',
+  name: 'Neaty Academy',
+  motto: 'Excellence in Every Detail',
+  address: '123 Innovation Drive, Tech City',
+  phone: '+1 234 567 890',
+  email: 'hello@neaty.edu',
+};
 
-export const SUBJECTS: Subject[] = [
-  { id: '1', name: 'Mathematics' },
-  { id: '2', name: 'English Language' },
-  { id: '3', name: 'Science' },
-  { id: '4', name: 'Social Studies' },
-  { id: '5', name: 'Physical Education' },
-  { id: '6', name: 'Art' },
-  { id: '7', name: 'Computer Science' },
-  { id: '8', name: 'History' },
+export const DEMO_ACADEMIC_YEARS: AcademicYear[] = [
+  { id: 'ay1', name: '2024/2025', isCurrent: true },
+];
+
+export const DEMO_TERMS: Term[] = [
+  { id: 't1', academicYearId: 'ay1', name: 'Term 1', isCurrent: true },
+  { id: 't2', academicYearId: 'ay1', name: 'Term 2', isCurrent: false },
+  { id: 't3', academicYearId: 'ay1', name: 'Term 3', isCurrent: false },
+];
+
+export const DEMO_CLASSES: Class[] = [
+  { id: 'c1', name: 'Grade 10' },
+  { id: 'c2', name: 'Grade 11' },
+];
+
+export const DEMO_STREAMS: Stream[] = [
+  { id: 'st1', classId: 'c1', name: 'Science' },
+  { id: 'st2', classId: 'c1', name: 'Arts' },
+  { id: 'st3', classId: 'c2', name: 'Science' },
+];
+
+export const DEMO_SUBJECTS: Subject[] = [
+  { id: 'sub1', name: 'Mathematics', code: 'MATH101' },
+  { id: 'sub2', name: 'English', code: 'ENG101' },
+  { id: 'sub3', name: 'Physics', code: 'PHY101' },
+  { id: 'sub4', name: 'History', code: 'HIS101' },
 ];
 
 export const DEMO_STUDENTS: Student[] = [
-  { id: '1', fullName: 'John Doe', admissionNumber: 'ADM-001', gender: 'Male', class: 'Grade 10', term: 'Term 1' },
-  { id: '2', fullName: 'Jane Smith', admissionNumber: 'ADM-002', gender: 'Female', class: 'Grade 10', term: 'Term 1' },
-  { id: '3', fullName: 'Alice Johnson', admissionNumber: 'ADM-003', gender: 'Female', class: 'Grade 11', term: 'Term 1' },
-  { id: '4', fullName: 'Bob Brown', admissionNumber: 'ADM-004', gender: 'Male', class: 'Grade 11', term: 'Term 1' },
+  { id: 'stu1', fullName: 'Alice Wonder', admissionNumber: 'N-001', gender: 'Female' },
+  { id: 'stu2', fullName: 'Bob Builder', admissionNumber: 'N-002', gender: 'Male' },
+  { id: 'stu3', fullName: 'Charlie Brown', admissionNumber: 'N-003', gender: 'Male' },
 ];
 
-export const calculateGrade = (total: number): { grade: Grade; remark: string } => {
-  if (total >= 80) return { grade: 'A', remark: 'Excellent' };
-  if (total >= 70) return { grade: 'B', remark: 'Very Good' };
-  if (total >= 60) return { grade: 'C', remark: 'Good' };
-  if (total >= 50) return { grade: 'D', remark: 'Pass' };
-  return { grade: 'F', remark: 'Fail' };
+export const DEMO_ENROLLMENTS: Enrollment[] = [
+  { id: 'e1', studentId: 'stu1', academicYearId: 'ay1', classId: 'c1', streamId: 'st1' },
+  { id: 'e2', studentId: 'stu2', academicYearId: 'ay1', classId: 'c1', streamId: 'st1' },
+  { id: 'e3', studentId: 'stu3', academicYearId: 'ay1', classId: 'c2', streamId: 'st3' },
+];
+
+export const DEMO_ASSESSMENT_COMPONENTS: AssessmentComponent[] = [
+  { id: 'ac1', name: 'Test 1', weight: 20, maxScore: 20 },
+  { id: 'ac2', name: 'Test 2', weight: 20, maxScore: 20 },
+  { id: 'ac3', name: 'Final Exam', weight: 60, maxScore: 100 },
+];
+
+export const DEMO_GRADE_SCALE: GradeScale[] = [
+  { id: 'gs1', minScore: 80, maxScore: 100, grade: 'A', remark: 'Excellent' },
+  { id: 'gs2', minScore: 70, maxScore: 79, grade: 'B', remark: 'Very Good' },
+  { id: 'gs3', minScore: 60, maxScore: 69, grade: 'C', remark: 'Good' },
+  { id: 'gs4', minScore: 50, maxScore: 59, grade: 'D', remark: 'Pass' },
+  { id: 'gs5', minScore: 0, maxScore: 49, grade: 'F', remark: 'Fail' },
+];
+
+export const calculateWeightedTotal = (scores: { [componentId: string]: number }, components: AssessmentComponent[]): number => {
+  let total = 0;
+  components.forEach(comp => {
+    const score = scores[comp.id] || 0;
+    // Calculate weighted contribution: (score / maxScore) * weight
+    total += (score / comp.maxScore) * comp.weight;
+  });
+  return Math.round(total * 100) / 100;
 };
 
-export const DEMO_MARKS: Mark[] = [
-  {
-    id: '1',
-    studentId: '1',
-    subjectId: '1',
-    test1: 15,
-    test2: 15,
-    exam: 60,
-    total: 90,
-    average: 90,
-    grade: 'A',
-    remark: 'Excellent',
-  },
-  {
-    id: '2',
-    studentId: '1',
-    subjectId: '2',
-    test1: 12,
-    test2: 13,
-    exam: 50,
-    total: 75,
-    average: 75,
-    grade: 'B',
-    remark: 'Very Good',
-  },
-  {
-    id: '3',
-    studentId: '2',
-    subjectId: '1',
-    test1: 10,
-    test2: 10,
-    exam: 45,
-    total: 65,
-    average: 65,
-    grade: 'C',
-    remark: 'Good',
-  },
-];
+export const getGradeFromScale = (total: number, scale: GradeScale[]): { grade: string; remark: string } => {
+  const found = scale.find(s => total >= s.minScore && total <= s.maxScore);
+  return found ? { grade: found.grade, remark: found.remark } : { grade: 'N/A', remark: 'No Grade' };
+};
