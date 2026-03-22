@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LayoutDashboard, Users, FileEdit, FileText, LogOut, GraduationCap, Menu, X, Settings as SettingsIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -13,21 +13,56 @@ import MarksEntryPage from '../modules/marks-entry/MarksEntryPage';
 import ReportCardsPage from '../modules/report-cards/ReportCardsPage';
 import SchoolSettingsPage from '../modules/school-settings/SchoolSettingsPage';
 
+const createId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return Math.random().toString(36).slice(2, 11);
+};
+
 export default function AppShell() {
-  const [state, setState] = useState<AppState>(() => {
-    const saved = loadState();
-    return saved ? { ...INITIAL_STATE, ...saved } : INITIAL_STATE;
-  });
+  const [state, setState] = useState<AppState>(INITIAL_STATE);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const hydratedRef = useRef(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState<string>('Dashboard');
 
   useEffect(() => {
-    saveState(state);
+    let isMounted = true;
+
+    const bootstrap = async () => {
+      try {
+        const saved = await loadState();
+        if (isMounted && saved) {
+          setState({ ...INITIAL_STATE, ...saved });
+        }
+      } finally {
+        if (isMounted) {
+          hydratedRef.current = true;
+          setIsBootstrapping(false);
+        }
+      }
+    };
+
+    void bootstrap();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydratedRef.current) {
+      return;
+    }
+
+    void saveState(state);
   }, [state]);
 
   const handleLogin = (user: any) => {
-    setState(prev => ({ ...prev, user }));
+    setState(prev => ({ ...prev, user: { ...user, id: user.id || createId() } }));
     setCurrentPage('Dashboard');
   };
 
@@ -35,6 +70,22 @@ export default function AppShell() {
     setState(prev => ({ ...prev, user: null }));
     setCurrentPage('Dashboard');
   };
+
+  if (isBootstrapping) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100">
+            <GraduationCap size={24} />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">Loading Neaty</h1>
+            <p className="text-sm text-gray-500">Preparing your workspace...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!state.user) {
     return <LoginPage onLogin={handleLogin} />;
@@ -53,12 +104,10 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans text-gray-900">
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-white border-r border-gray-100 transition-all duration-300 shadow-2xl ${isSidebarOpen ? 'w-72' : 'w-20'}`}
       >
         <div className="h-full flex flex-col">
-          {/* Logo */}
           <div className="p-6 flex items-center gap-4 border-b border-gray-50">
             <div className="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-100 shrink-0">
               <GraduationCap size={24} />
@@ -74,7 +123,6 @@ export default function AppShell() {
             )}
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2 mt-4">
             {navItems.map((item) => (
               <button
@@ -88,7 +136,6 @@ export default function AppShell() {
             ))}
           </nav>
 
-          {/* User Profile & Logout */}
           <div className="p-4 border-t border-gray-50">
             <div className={`flex items-center gap-3 p-3 rounded-2xl bg-gray-50 mb-4 ${!isSidebarOpen && 'justify-center'}`}>
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 font-black shrink-0">
@@ -112,9 +159,7 @@ export default function AppShell() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-72' : 'ml-20'}`}>
-        {/* Header */}
         <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 p-4 md:px-8 flex items-center justify-between">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -131,7 +176,6 @@ export default function AppShell() {
           </div>
         </header>
 
-        {/* Page Content */}
         <div className="p-4 md:p-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
@@ -142,20 +186,20 @@ export default function AppShell() {
               transition={{ duration: 0.2 }}
             >
               {currentPage === 'Dashboard' && (
-                <DashboardPage 
-                  students={state.students} 
-                  marks={state.marks} 
-                  subjects={state.subjects} 
-                  classes={state.classes} 
+                <DashboardPage
+                  students={state.students}
+                  marks={state.marks}
+                  subjects={state.subjects}
+                  classes={state.classes}
                 />
               )}
               {currentPage === 'Students' && (
-                <StudentsPage 
-                  students={state.students} 
+                <StudentsPage
+                  students={state.students}
                   onAddStudent={(newStudent) => {
-                    const student = { ...newStudent, id: Math.random().toString(36).substr(2, 9) };
+                    const student = { ...newStudent, id: createId() };
                     setState(prev => ({ ...prev, students: [...prev.students, student] }));
-                  }} 
+                  }}
                   onDeleteStudent={(id) => {
                     setState(prev => ({
                       ...prev,
@@ -163,12 +207,12 @@ export default function AppShell() {
                       marks: prev.marks.filter(m => m.studentId !== id),
                       enrollments: prev.enrollments.filter(e => e.studentId !== id)
                     }));
-                  }} 
+                  }}
                 />
               )}
               {currentPage === 'MarksEntry' && (
-                <MarksEntryPage 
-                  students={state.students} 
+                <MarksEntryPage
+                  students={state.students}
                   enrollments={state.enrollments}
                   subjects={state.subjects}
                   assessmentComponents={state.assessmentComponents}
@@ -176,12 +220,12 @@ export default function AppShell() {
                   currentTerm={currentTerm}
                   currentAcademicYear={currentYear}
                   onSaveMarks={(mark) => {
-                    const newMark = { ...mark, id: Math.random().toString(36).substr(2, 9) };
+                    const newMark = { ...mark, id: createId() };
                     setState(prev => {
-                      const existingIdx = prev.marks.findIndex(m => 
-                        m.studentId === newMark.studentId && 
-                        m.subjectId === newMark.subjectId && 
-                        m.termId === newMark.termId && 
+                      const existingIdx = prev.marks.findIndex(m =>
+                        m.studentId === newMark.studentId &&
+                        m.subjectId === newMark.subjectId &&
+                        m.termId === newMark.termId &&
                         m.academicYearId === newMark.academicYearId
                       );
                       const updatedMarks = [...prev.marks];
@@ -192,14 +236,14 @@ export default function AppShell() {
                       }
                       return { ...prev, marks: updatedMarks };
                     });
-                  }} 
+                  }}
                   marks={state.marks}
                 />
               )}
               {currentPage === 'ReportCards' && (
-                <ReportCardsPage 
-                  students={state.students} 
-                  marks={state.marks} 
+                <ReportCardsPage
+                  students={state.students}
+                  marks={state.marks}
                   school={state.school}
                   subjects={state.subjects}
                   assessmentComponents={state.assessmentComponents}
@@ -212,7 +256,7 @@ export default function AppShell() {
                 />
               )}
               {currentPage === 'Settings' && (
-                <SchoolSettingsPage 
+                <SchoolSettingsPage
                   school={state.school}
                   academicYears={state.academicYears}
                   terms={state.terms}

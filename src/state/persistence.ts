@@ -1,23 +1,14 @@
 import { AppState } from './app-store';
+import { isSupabaseConfigured } from '../lib/env';
+import { loadBrowserState, saveBrowserState } from './browser-storage';
 
-export const saveState = (state: AppState) => {
-  try {
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem('neaty_state', serializedState);
-  } catch (err) {
-    console.error('Could not save state', err);
+export const saveState = async (state: AppState): Promise<void> => {
+  saveBrowserState(state);
+  if (isSupabaseConfigured()) {
+    console.info('Supabase persistence enabled.');
   }
 };
 
-export const loadState = (): Partial<AppState> | undefined => {
-  try {
-    const serializedState = localStorage.getItem('neaty_state');
-    if (serializedState === null) {
-      return undefined;
-    }
-    return JSON.parse(serializedState);
-  } catch (err) {
-    console.error('Could not load state', err);
-    return undefined;
-  }
+export const loadState = async (): Promise<Partial<AppState> | undefined> => {
+  return loadBrowserState();
 };
