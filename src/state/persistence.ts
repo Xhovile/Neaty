@@ -1,23 +1,41 @@
+import { isSupabaseConfigured } from '../lib/env';
+import { loadRemoteState, saveRemoteState } from '../integrations/supabase/state-store';
 import { AppState } from './app-store';
+import { loadBrowserState, saveBrowserState } from './browser-storage';
 
-export const saveState = (state: AppState) => {
+export const saveState = async (state: AppState): Promise<void> => {
+  saveBrowserState(state);
+
+  if (!isSupabaseConfigured()) {
+    return;
+  }
+
   try {
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem('neaty_state', serializedState);
-  } catch (err) {
-    console.error('Could not save state', err);
+    await saveRemoteState(state);
+  } catch (error) {
+    console.error('Remote save failed. Falling back to browser storage only.', error);
   }
 };
 
-export const loadState = (): Partial<AppState> | undefined => {
-  try {
-    const serializedState = localStorage.getItem('neaty_state');
-    if (serializedState === null) {
-      return undefined;
-    }
-    return JSON.parse(serializedState);
-  } catch (err) {
-    console.error('Could not load state', err);
-    return undefined;
+export const loadState = async (): Promise<Partial<AppState> | undefined> => {
+  const browserState = loadBrowserState();
+
+  if (!isSupabaseConfigured()) {
+    return browserState;
   }
+
+  try {
+    const remoteState = await loadRemoteState();
+    if (remoteState) {
+      return {
+        ...browserState,
+        ...remoteState,
+        user: browserState?.user ?? null,
+      };
+    }
+  } catch (error) {
+    console.error('Remote load failed. Falling back to browser storage.', error);
+  }
+
+  return browserState;
 };
