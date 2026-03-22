@@ -8,10 +8,14 @@ export interface School {
   motto?: string;
 }
 
+export type UserRole = 'Admin' | 'Teacher' | 'HeadTeacher';
+
 export interface User {
   id: string;
   username: string;
-  role: 'Admin' | 'Teacher';
+  email?: string;
+  fullName?: string;
+  role: UserRole;
   schoolId: string;
 }
 
@@ -19,5 +23,5 @@ export interface Teacher {
   id: string;
   fullName: string;
   email: string;
-  role: 'Admin' | 'Teacher';
+  role: UserRole;
 }

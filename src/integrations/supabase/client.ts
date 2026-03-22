@@ -1,4 +1,5 @@
 import { assertSupabaseEnv, isSupabaseConfigured } from '../../lib/env';
+import { getSupabaseBrowserClient } from './browser-client';
 
 export interface SupabaseRequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -6,16 +7,19 @@ export interface SupabaseRequestOptions {
   headers?: Record<string, string>;
 }
 
-const buildHeaders = (headers: Record<string, string> = {}) => {
+const buildHeaders = async (headers: Record<string, string> = {}) => {
   if (!isSupabaseConfigured()) {
     throw new Error('Supabase is not configured for this environment.');
   }
 
   const { supabaseAnonKey } = assertSupabaseEnv();
+  const supabase = getSupabaseBrowserClient();
+  const { data } = await supabase.auth.getSession();
+  const accessToken = data.session?.access_token;
 
   return {
     apikey: supabaseAnonKey,
-    Authorization: `Bearer ${supabaseAnonKey}`,
+    Authorization: `Bearer ${accessToken ?? supabaseAnonKey}`,
     'Content-Type': 'application/json',
     ...headers,
   };
@@ -25,7 +29,7 @@ export const supabaseRestRequest = async <T>(path: string, options: SupabaseRequ
   const { supabaseUrl } = assertSupabaseEnv();
   const response = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
     method: options.method ?? 'GET',
-    headers: buildHeaders(options.headers),
+    headers: await buildHeaders(options.headers),
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
