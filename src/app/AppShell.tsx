@@ -12,6 +12,7 @@ import StudentsPage from '../modules/students/StudentsPage';
 import MarksEntryPage from '../modules/marks-entry/MarksEntryPage';
 import ReportCardsPage from '../modules/report-cards/ReportCardsPage';
 import SchoolSettingsPage from '../modules/school-settings/SchoolSettingsPage';
+import { fetchAuthenticatedProfile, getCurrentSession, onAuthStateChanged, signOutCurrentUser } from '../integrations/supabase/auth-service';
 
 const createId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -35,9 +36,31 @@ export default function AppShell() {
     const bootstrap = async () => {
       try {
         const saved = await loadState();
-        if (isMounted && saved) {
-          setState({ ...INITIAL_STATE, ...saved });
+        if (!isMounted) {
+          return;
         }
+
+        const mergedState = saved ? { ...INITIAL_STATE, ...saved } : INITIAL_STATE;
+        setState(mergedState);
+
+        const session = await getCurrentSession();
+        if (!isMounted || !session) {
+          return;
+        }
+
+        const authState = await fetchAuthenticatedProfile(session);
+        if (!isMounted) {
+          return;
+        }
+
+        setState(prev => ({
+          ...prev,
+          ...mergedState,
+          school: authState.school,
+          user: authState.user,
+        }));
+      } catch (error) {
+        console.error('Failed to bootstrap Neaty app shell.', error);
       } finally {
         if (isMounted) {
           hydratedRef.current = true;
@@ -48,8 +71,39 @@ export default function AppShell() {
 
     void bootstrap();
 
+    const unsubscribe = onAuthStateChanged((session) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (!session) {
+        setState(prev => ({ ...prev, user: null }));
+        setCurrentPage('Dashboard');
+        return;
+      }
+
+      void (async () => {
+        try {
+          const authState = await fetchAuthenticatedProfile(session);
+          if (!isMounted) {
+            return;
+          }
+
+          setState(prev => ({
+            ...prev,
+            school: authState.school,
+            user: authState.user,
+          }));
+          setCurrentPage('Dashboard');
+        } catch (error) {
+          console.error('Failed to refresh authenticated profile.', error);
+        }
+      })();
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 
@@ -61,14 +115,19 @@ export default function AppShell() {
     void saveState(state);
   }, [state]);
 
-  const handleLogin = (user: any) => {
-    setState(prev => ({ ...prev, user: { ...user, id: user.id || createId() } }));
+  const handleLogin = () => {
     setCurrentPage('Dashboard');
   };
 
-  const handleLogout = () => {
-    setState(prev => ({ ...prev, user: null }));
-    setCurrentPage('Dashboard');
+  const handleLogout = async () => {
+    try {
+      await signOutCurrentUser();
+    } catch (error) {
+      console.error('Failed to sign out.', error);
+      setState(prev => ({ ...prev, user: null }));
+    } finally {
+      setCurrentPage('Dashboard');
+    }
   };
 
   if (isBootstrapping) {
@@ -88,7 +147,7 @@ export default function AppShell() {
   }
 
   if (!state.user) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin as any} />;
   }
 
   const navItems = [
@@ -143,13 +202,13 @@ export default function AppShell() {
               </div>
               {isSidebarOpen && (
                 <div className="overflow-hidden">
-                  <p className="text-sm font-bold text-gray-800 truncate">{state.user.username}</p>
+                  <p className="text-sm font-bold text-gray-800 truncate">{state.user.fullName || state.user.username}</p>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{state.user.role}</p>
                 </div>
               )}
             </div>
             <button
-              onClick={handleLogout}
+              onClick={() => void handleLogout()}
               className={`w-full flex items-center gap-4 p-4 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all group ${!isSidebarOpen && 'justify-center'}`}
             >
               <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />

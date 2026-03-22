@@ -1,27 +1,34 @@
 import React, { useState } from 'react';
-import { User as UserType } from '../../domain/school/types';
-import { LogIn, GraduationCap, ShieldCheck, UserCircle } from 'lucide-react';
+import { LogIn, GraduationCap, ShieldCheck, Mail, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { User as UserType } from '../../domain/school/types';
+import { signInWithPassword } from '../../integrations/supabase/auth-service';
 
 interface LoginPageProps {
   onLogin: (user: UserType) => void;
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'Admin' | 'Teacher'>('Admin');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login
-    if (username.trim()) {
-      onLogin({
-        id: Math.random().toString(36).substr(2, 9),
-        username,
-        role,
-        schoolId: 's1',
-      });
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      const { session } = await signInWithPassword(email.trim(), password);
+      if (!session) {
+        throw new Error('No active session was returned.');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to sign in right now.';
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -43,16 +50,16 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Username</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email address</label>
               <div className="relative">
-                <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
-                  type="text"
+                  type="email"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
-                  placeholder="Enter your username"
+                  placeholder="you@school.edu"
                 />
               </div>
             </div>
@@ -72,30 +79,26 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as 'Admin' | 'Teacher')}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm appearance-none cursor-pointer"
-              >
-                <option value="Admin">Administrator</option>
-                <option value="Teacher">Teacher</option>
-              </select>
-            </div>
+            {errorMessage && (
+              <div className="flex gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <p>{errorMessage}</p>
+              </div>
+            )}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 group"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 group"
             >
-              <span>Sign In</span>
+              <span>{isSubmitting ? 'Signing In...' : 'Sign In'}</span>
               <LogIn size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-gray-100 text-center">
             <p className="text-xs text-gray-400">
-              &copy; 2024 EduReport Pro. All rights reserved.
+              Use your assigned Neaty account to access your school workspace.
             </p>
           </div>
         </div>
